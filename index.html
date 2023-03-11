@@ -1,0 +1,175 @@
+Mapa
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Monitorar Equipes</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+
+    <style>
+      /* Estilo do mapa */
+      #map {
+        width: 80%;
+        height: 100%;
+        float: right;
+             }
+
+      /* Estilo da label da equipe */
+      .team-label {
+        position: relative;
+        top: -31px;
+        left: -1px;
+        background-color: yellow;
+        padding: 5px;
+        border-radius: 5px;
+        border-color: white;
+        font-weight: bold; /* Adiciona negrito */
+        color: white; /* adiciona cor branca para o texto */
+      }
+
+      /* Estilo da label da equipe com iniciais "FT" */
+      .team-label-ft {
+        background-color: #ff0000;
+        color: white;
+      }
+
+      /* Estilo da label da equipe com iniciais "CCT" */
+      .team-label-cct {
+        background-color: #0083f4;
+        color: white;
+      }
+
+      /* Estilo do menu */
+      #menu {
+       position: absolute;
+       top: 0;
+       left: 0;
+       width: 20%;
+       height: 100%;
+       background-color: #333;
+  color: white;
+  padding: 10px;
+  box-sizing: border-box;
+      }
+
+      /* Estilo dos botões do menu */
+      .menu-button {
+        display: block;
+        width: 100%;
+        background-color: #555;
+        color: white;
+        border: none;
+        padding: 10px;
+        margin-bottom: 10px;
+        cursor: pointer;
+      }
+
+      /* Estilo dos botões do menu quando o mouse estiver sobre eles */
+      .menu-button:hover {
+        background-color: #777;
+      }
+      /* Estilo dos botões do menu */
+.menu-button {
+  display: block;
+  width: 100%;
+  background-color: #555;
+  color: white;
+  border: none;
+  padding: 10px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+/* Estilo dos botões do menu quando o mouse estiver sobre eles */
+.menu-button:hover {
+  background-color: #777;
+}
+    </style>
+  </head>
+  <body>
+    
+    <div id="menu">
+     
+     
+       
+    </div>
+    <div id="map"></div>
+
+    <script>
+      
+  function initMap() {
+    // Cria o mapa com uma localização inicial
+    var map = new google.maps.Map(document.getElementById('map'), {
+      center: {lat: -26.303175563847706, lng: -48.832639656617395},
+      zoom: 13
+    });
+
+    // Adiciona marcadores no mapa para cada equipe
+    /* Para cada linha na planilha, crie um marcador no mapa
+    Substituir "PLANILHA_ID" pelo ID da planilha */
+
+    fetch('https://docs.google.com/spreadsheets/d/1UADKHPxioypSiHFcQmupGIqC5bgOrmlSgbaT5muevqE/gviz/tq?tqx=out:json')
+      .then(function(response) {
+        return response.text();
+      })
+      .then(function(text) {
+        var json = JSON.parse(text.substr(47).slice(0, -2));
+        var data = json.table.rows;
+        for (var i = 0; i < data.length; i++) {
+          var id = data[i].c[0].v;
+          var lat = parseFloat(data[i].c[3].v);
+          var lng = parseFloat(data[i].c[4].v);
+          var teamName = data[i].c[0].v;
+          var markerColor = 'black';
+          var labelClass = 'team-label';
+          // Cria botões no menu lateral para cada equipe
+var teamButtonsDiv = document.getElementById('team-buttons');
+for (var i = 0; i < data.length; i++) {
+  var teamName = data[i].c[0].v;
+  var teamAddress = data[i].c[5].v;
+  var button = document.createElement('button');
+  button.innerText = teamName + '\n' + teamAddress;
+  button.className = 'menu-button';
+  button.setAttribute('data-lat', data[i].c[3].v);
+  button.setAttribute('data-lng', data[i].c[4].v);
+  teamButtonsDiv.appendChild(button);
+
+  // Centraliza o mapa no marcador correspondente ao clicar no botão
+  button.addEventListener('click', function() {
+    var lat = parseFloat(this.getAttribute('data-lat'));
+    var lng = parseFloat(this.getAttribute('data-lng'));
+    map.setCenter({lat: lat, lng: lng});
+  });
+}
+
+
+          if (teamName.substring(0, 2) === 'FT') {
+            markerColor = 'red';
+            labelClass += ' team-label-ft'; // Adiciona classe para estilo com fundo vermelho
+          } else if (teamName.substring(0, 3) === 'CCT') {
+            markerColor = 'blue';
+            labelClass += ' team-label-cct'; // Adiciona classe para estilo com fundo azul
+          }
+
+          var marker = new google.maps.Marker({
+            position: {lat: lat, lng: lng},
+            map: map,
+            label: {
+              text: teamName,
+              className: labelClass // Usa a classe de estilo apropriada
+            },
+            title: 'Equipe ' + id,
+            icon: {
+              url: 'http://maps.google.com/mapfiles/ms/icons/' + markerColor + '-dot.png'
+            }
+          });
+        }
+      });
+  }
+      
+</script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCAzB5gUI2_CdIw2biLJOtpEQ6proCsS_E&callback=initMap"></script>
+  </body>
+</html>
+
+
